@@ -1,0 +1,42 @@
+import { useQuery } from "@tanstack/react-query";
+import useAxiosSecure from "../../hooks/useAxiosSecure";
+
+const Dashboard = () => {
+  const axiosSecure = useAxiosSecure();
+
+  const { data: stats = {}, isLoading } = useQuery({
+    queryKey: ["staff-dashboard"],
+    queryFn: async () => {
+      const res = await axiosSecure.get("/staff/dashboard");
+      return res.data;
+    },
+  });
+
+  if (isLoading) return <div className="text-center mt-20">Loading...</div>;
+
+  return (
+    <div className="p-6">
+      <h1 className="text-3xl font-bold text-green-600 mb-6">Staff Dashboard</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="bg-white p-4 rounded shadow">
+          <h2 className="font-semibold">Assigned Issues</h2>
+          <p className="text-2xl">{stats.assigned || 0}</p>
+        </div>
+        <div className="bg-yellow-100 p-4 rounded shadow">
+          <h2 className="font-semibold">Resolved Issues</h2>
+          <p className="text-2xl">{stats.resolved || 0}</p>
+        </div>
+        <div className="bg-blue-100 p-4 rounded shadow">
+          <h2 className="font-semibold">Today's Tasks</h2>
+          <p className="text-2xl">{stats.todayTasks || 0}</p>
+        </div>
+        <div className="bg-purple-100 p-4 rounded shadow">
+          <h2 className="font-semibold">Other Stats</h2>
+          <p className="text-2xl">{stats.other || 0}</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Dashboard;
