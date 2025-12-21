@@ -8,16 +8,31 @@ const MyIssues = () => {
   const queryClient = useQueryClient();
   const userEmail = localStorage.getItem("user-email");
 
-  const { data: issues = [], isLoading } = useQuery(["my-issues", userEmail], async () => {
-    const res = await axiosSecure.get(`/citizen/my-issues?email=${userEmail}`);
-    return res.data;
-  });
+  // Filter states
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
 
-  // Modal State
+  // Modal state
   const [editingIssue, setEditingIssue] = useState(null);
 
+  // Fetch issues with React Query & filters
+  const { data: issues = [], isLoading } = useQuery(
+    ["my-issues", userEmail, statusFilter, categoryFilter],
+    async () => {
+      const res = await axiosSecure.get("/users/my-issues", {
+        params: {
+          email: userEmail,
+          status: statusFilter,
+          category: categoryFilter,
+        },
+      });
+      return res.data;
+    }
+  );
+
   const handleDelete = async (issueId, status) => {
-    if (status !== "pending") return toast.error("Only pending issues can be deleted");
+    if (status !== "pending")
+      return toast.error("Only pending issues can be deleted");
     if (!window.confirm("Delete this issue?")) return;
 
     try {
@@ -32,7 +47,10 @@ const MyIssues = () => {
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axiosSecure.patch(`/citizen/my-issues/${editingIssue._id}`, editingIssue);
+      await axiosSecure.patch(
+        `/citizen/my-issues/${editingIssue._id}`,
+        editingIssue
+      );
       toast.success("Issue updated successfully");
       setEditingIssue(null);
       queryClient.invalidateQueries(["my-issues", userEmail]);
@@ -45,16 +63,45 @@ const MyIssues = () => {
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
-      <h1 className="text-3xl font-bold text-green-600 mb-6">My Issues</h1>
+      <h1 className="text-3xl font-bold text-green-600 mb-4">My Issues</h1>
 
+      {/* Filters */}
+      <div className="flex gap-4 mb-6">
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="border p-2 rounded"
+        >
+          <option value="all">All Status</option>
+          <option value="pending">Pending</option>
+          <option value="in-progress">In Progress</option>
+          <option value="resolved">Resolved</option>
+          <option value="closed">Closed</option>
+        </select>
+
+        <select
+          value={categoryFilter}
+          onChange={(e) => setCategoryFilter(e.target.value)}
+          className="border p-2 rounded"
+        >
+          <option value="all">All Categories</option>
+          <option value="Road">Road</option>
+          <option value="Water">Water</option>
+          <option value="Electricity">Electricity</option>
+          <option value="Garbage">Garbage</option>
+        </select>
+      </div>
+
+      {/* Issues Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {issues.map((issue) => (
           <div key={issue._id} className="bg-white p-4 rounded shadow">
             <h2 className="font-semibold text-lg">{issue.title}</h2>
             <p>Status: <span className="font-semibold">{issue.status}</span></p>
             <p>Priority: <span className="font-semibold">{issue.priority}</span></p>
+            <p>Category: <span className="font-semibold">{issue.category}</span></p>
 
-            <div className="mt-2 flex gap-2">
+            <div className="mt-2 flex gap-2 flex-wrap">
               {issue.status === "pending" && (
                 <button
                   onClick={() => setEditingIssue(issue)}
@@ -72,7 +119,7 @@ const MyIssues = () => {
                 </button>
               )}
               <button
-                onClick={() => window.location.href = `/issues/${issue._id}`}
+                onClick={() => (window.location.href = `/issues/${issue._id}`)}
                 className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
               >
                 View Details
@@ -90,14 +137,18 @@ const MyIssues = () => {
             <form onSubmit={handleEditSubmit} className="space-y-4">
               <input
                 value={editingIssue.title}
-                onChange={(e) => setEditingIssue({...editingIssue, title: e.target.value})}
+                onChange={(e) =>
+                  setEditingIssue({ ...editingIssue, title: e.target.value })
+                }
                 className="w-full border p-2 rounded"
                 placeholder="Title"
                 required
               />
               <textarea
                 value={editingIssue.description}
-                onChange={(e) => setEditingIssue({...editingIssue, description: e.target.value})}
+                onChange={(e) =>
+                  setEditingIssue({ ...editingIssue, description: e.target.value })
+                }
                 className="w-full border p-2 rounded"
                 rows="4"
                 placeholder="Description"

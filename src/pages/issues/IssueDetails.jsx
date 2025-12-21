@@ -1,115 +1,99 @@
-// import { useEffect, useState } from "react";
-// import { useParams } from "react-router-dom";
-// import useAxiosSecure from "../../hooks/useAxiosSecure";
-// import useAuth from "../../hooks/useAuth";
-// import { toast } from "react-hot-toast";
+import { useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import useAxiosSecure from "../../hooks/useAxiosSecure";
+import { toast } from "react-hot-toast";
 
-// const IssueDetails = () => {
-//   const { id } = useParams();
-//   const { user } = useAuth();
-//   const axiosSecure = useAxiosSecure();
+const IssueDetails = () => {
+  const { id } = useParams();
+  const axiosSecure = useAxiosSecure();
 
-//   const [issue, setIssue] = useState(null);
-//   const [loading, setLoading] = useState(true);
+  const { data: issue = {}, isLoading, isError, refetch } = useQuery({
+    queryKey: ["issue-details", id],
+    queryFn: async () => {
+      const res = await axiosSecure.get(`/issues/${id}`);
+      return res.data;
+    },
+  });
 
-//   const fetchIssue = async () => {
-//     try {
-//       const res = await axiosSecure.get(`/issues/${id}`);
-//       setIssue(res.data);
-//     } catch (err) {
-//       console.error(err);
-//       toast.error("Failed to load issue");
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
+  const handleBoost = async () => {
+    try {
+      await axiosSecure.patch(`/issues/boost/${id}`);
+      toast.success("Issue boosted successfully");
+      refetch();
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Boost failed");
+    }
+  };
 
-//   useEffect(() => {
-//     fetchIssue();
-//   }, [id]);
+  if (isLoading) return <div className="text-center py-20">Loading...</div>;
+  if (isError)
+    return (
+      <div className="text-center py-20 text-red-500">
+        Failed to load issue
+      </div>
+    );
 
-//   const handleDelete = async () => {
-//     if (!confirm("Delete this issue?")) return;
-//     try {
-//       await axiosSecure.delete(`/citizen/my-issues/${id}`);
-//       toast.success("Issue deleted");
-//       window.location.href = "/dashboard/my-issues";
-//     } catch (err) {
-//       console.error(err);
-//       toast.error("Failed to delete issue");
-//     }
-//   };
+  return (
+    <div className="max-w-5xl mx-auto px-4 py-16">
+      {issue.image && (
+        <img
+          src={issue.image}
+          alt={issue.title}
+          className="w-full h-96 object-cover rounded mb-6"
+        />
+      )}
 
-//   const handleBoost = async () => {
-//     try {
-//       // Payment integration logic here (e.g., Stripe)
-//       const res = await axiosSecure.post(`/issues/boost/${id}`, { email: user.email });
-//       toast.success("Issue boosted successfully!");
-//       fetchIssue();
-//     } catch (err) {
-//       console.error(err);
-//       toast.error("Boost failed");
-//     }
-//   };
+      <h1 className="text-4xl font-bold mb-2">{issue.title}</h1>
 
-//   if (loading) return <div className="text-center mt-20">Loading...</div>;
-//   if (!issue) return <div className="text-center mt-20">Issue not found</div>;
+      <div className="flex gap-3 mb-4 flex-wrap">
+        <span className="px-3 py-1 bg-green-100 text-green-700 rounded">
+          {issue.category}
+        </span>
+        <span className="px-3 py-1 bg-red-100 text-red-700 rounded">
+          {issue.priority}
+        </span>
+        <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded">
+          {issue.status}
+        </span>
+      </div>
 
-//   return (
-//     <div className="max-w-3xl mx-auto p-6">
-//       <h1 className="text-3xl font-bold text-green-600 mb-4">{issue.title}</h1>
-//       <p className="mb-2"><span className="font-semibold">Category:</span> {issue.category}</p>
-//       <p className="mb-2"><span className="font-semibold">Location:</span> {issue.location}</p>
-//       <p className="mb-2"><span className="font-semibold">Status:</span> {issue.status}</p>
-//       <p className="mb-2"><span className="font-semibold">Priority:</span> {issue.priority}</p>
-//       {issue.assignedStaff && (
-//         <p className="mb-2"><span className="font-semibold">Assigned Staff:</span> {issue.assignedStaff.name}</p>
-//       )}
-//       {issue.image && (
-//         <img src={issue.image} alt="issue" className="mt-4 rounded shadow" />
-//       )}
-//       <div className="mt-4 flex gap-4">
-//         {user.email === issue.email && issue.status === "pending" && (
-//           <>
-//             <button
-//               onClick={handleDelete}
-//               className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
-//             >
-//               Delete
-//             </button>
-//             <button
-//               onClick={() => window.location.href = `/dashboard/edit-issue/${id}`}
-//               className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
-//             >
-//               Edit
-//             </button>
-//           </>
-//         )}
-//         {user.email === issue.email && issue.priority !== "high" && (
-//           <button
-//             onClick={handleBoost}
-//             className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
-//           >
-//             Boost Priority
-//           </button>
-//         )}
-//       </div>
+      <p className="text-gray-600 mb-2">📍 {issue.location}</p>
 
-//       {/* Timeline Section */}
-//       <div className="mt-8">
-//         <h2 className="text-2xl font-semibold mb-4">Issue Timeline</h2>
-//         <div className="border-l-2 border-green-600 pl-4 space-y-4">
-//           {issue.timeline?.map((entry, index) => (
-//             <div key={index} className="relative">
-//               <span className="absolute -left-3 top-1 w-6 h-6 bg-green-600 rounded-full"></span>
-//               <p><span className="font-semibold">{entry.status}</span> - {entry.message}</p>
-//               <p className="text-sm text-gray-500">{entry.updatedBy} | {new Date(entry.date).toLocaleString()}</p>
-//             </div>
-//           ))}
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
+      <p className="text-gray-700 leading-relaxed mb-4">
+        {issue.description}
+      </p>
 
-// export default IssueDetails;
+      <div className="font-semibold mb-4">
+        👍 Upvotes: {issue.upvotes}
+      </div>
+
+      {!issue.isBoosted && (
+        <button
+          onClick={handleBoost}
+          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+        >
+          Boost Priority (100tk)
+        </button>
+      )}
+
+      {/* Timeline Section */}
+      <h2 className="text-2xl font-semibold mt-10 mb-4">
+        Issue Timeline
+      </h2>
+
+      <div className="border-l-2 border-green-600 pl-4 space-y-4">
+        {issue.timeline?.map((item, index) => (
+          <div key={index}>
+            <p className="font-semibold">{item.status}</p>
+            <p className="text-sm">{item.message}</p>
+            <p className="text-xs text-gray-500">
+              {new Date(item.updatedAt).toLocaleString()}
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default IssueDetails;

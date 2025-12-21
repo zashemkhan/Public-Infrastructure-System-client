@@ -6,15 +6,15 @@ import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
 import MainLayout from "../layouts/MainLayout";
 import DashboardLayout from "../layouts/DashboardLayout";
-import IssueDetails from "../pages/IssueDetails";
+import IssueDetails from "../pages/issues/IssueDetails";
 import MyIssues from "../pages/Dashboard/MyIssues";
 import AdminRoute from "./AdminRoute";
 import StaffRoute from "./StaffRoute";
 import AssignedIssues from "../pages/staff/AssignedIssues";
 import ManageUsers from "../pages/admin/ManageUsers";
 import AllIssues from "../pages/admin/AllIssues";
-import DashboardHome from "../pages/admin/DashboardHome";
 import AddIssue from "../pages/AllIssues/AddIssue";
+import DashboardHome from "../pages/Dashboard/DashboardHome";
 
 export const router = createBrowserRouter([
   {
@@ -23,7 +23,16 @@ export const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       { index: true, element: <Home /> },
-      { path: "issue/:id", element: <IssueDetails /> },
+
+      // ✅ Issue Details (public OR private)
+      {
+        path: "issue/:id",
+        element: (
+          <PrivateRoute>
+            <IssueDetails />
+          </PrivateRoute>
+        ),
+      },
     ],
   },
 
@@ -64,7 +73,7 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: "/dashboard/all-issues",
+        path: "all-issues",
         element: (
           <AdminRoute>
             <AllIssues />
