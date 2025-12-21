@@ -1,40 +1,54 @@
 import { useState } from "react";
-import axios from "axios";
+import { useQueryClient } from "@tanstack/react-query";
+import useAxiosSecure from "../../hooks/useAxiosSecure";
 import { toast } from "react-hot-toast";
 
 const CreateIssue = () => {
+  const axiosSecure = useAxiosSecure();
+  const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
+
+  // Get user info from localStorage
+  const userEmail = localStorage.getItem("user-email");
+  const userRole = localStorage.getItem("user-role"); // e.g., citizen
+  const isPremium = localStorage.getItem("user-isPremium") === "true";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    const form = e.target;
-    const issueData = {
-      title: form.title.value,
-      category: form.category.value,
-      priority: form.priority.value,
-      location: form.location.value,
-      description: form.description.value,
-      image: form.image.value,
-    };
-
     try {
-      const token = localStorage.getItem("access-token");
-
-      await axios.post(
-        `${import.meta.env.VITE_SERVER_URL}/issues`,
-        issueData,
-        {
-          headers: {
-            authorization: `Bearer ${token}`,
-          },
+      // Check user issue limit if not premium
+      if (!isPremium) {
+        const res = await axiosSecure.get(`/users/my-issues/count?email=${userEmail}`);
+        if (res.data.count >= 3) {
+          toast.error("Free users can submit only 3 issues. Upgrade to premium to submit more.");
+          setLoading(false);
+          return;
         }
-      );
+      }
+
+      const form = e.target;
+      const issueData = {
+        title: form.title.value,
+        category: form.category.value,
+        priority: form.priority.value,
+        location: form.location.value,
+        description: form.description.value,
+        image: form.image.value || "",
+        reporter: userEmail,
+      };
+
+      // Submit issue
+      await axiosSecure.post("/issues", issueData);
+
+      // Invalidate MyIssues query to refresh UI
+      queryClient.invalidateQueries(["my-issues"]);
 
       toast.success("Issue reported successfully!");
       form.reset();
     } catch (error) {
+      console.error(error);
       toast.error("Failed to submit issue");
     } finally {
       setLoading(false);
@@ -80,7 +94,7 @@ const CreateIssue = () => {
 
         <input
           name="image"
-          placeholder="Image URL"
+          placeholder="Image URL (optional)"
           className="w-full border p-3 rounded"
         />
 
