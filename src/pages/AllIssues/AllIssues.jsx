@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import IssueCard from "../../components/IssueCard";
-import { useAuth } from "../../context/AuthContext";
+// import { useAuth } from "../../context/AuthContext";
 import toast from "react-hot-toast";
+import { useAuth } from "../../context/AuthProvider";
 
 const AllIssues = () => {
   const { user } = useAuth();
@@ -20,10 +21,9 @@ const AllIssues = () => {
   const { data: issues = [], isLoading } = useQuery(
     ["issues", filters],
     async () => {
-      const res = await axios.get(
-        `${import.meta.env.VITE_SERVER_URL}/issues`,
-        { params: filters }
-      );
+      const res = await axios.get(`${import.meta.env.VITE_SERVER_URL}/issues`, {
+        params: filters,
+      });
       return res.data;
     }
   );
@@ -71,7 +71,12 @@ const AllIssues = () => {
 
       {/* Filter Section */}
       <div className="flex flex-wrap gap-4 mb-6">
-        <select name="category" onChange={handleFilterChange} value={filters.category} className="p-2 border rounded">
+        <select
+          name="category"
+          onChange={handleFilterChange}
+          value={filters.category}
+          className="p-2 border rounded"
+        >
           <option value="all">All Categories</option>
           <option value="pothole">Pothole</option>
           <option value="streetlight">Streetlight</option>
@@ -79,7 +84,12 @@ const AllIssues = () => {
           <option value="water">Water Leakage</option>
         </select>
 
-        <select name="status" onChange={handleFilterChange} value={filters.status} className="p-2 border rounded">
+        <select
+          name="status"
+          onChange={handleFilterChange}
+          value={filters.status}
+          className="p-2 border rounded"
+        >
           <option value="all">All Status</option>
           <option value="pending">Pending</option>
           <option value="in-progress">In-Progress</option>
@@ -87,7 +97,12 @@ const AllIssues = () => {
           <option value="closed">Closed</option>
         </select>
 
-        <select name="priority" onChange={handleFilterChange} value={filters.priority} className="p-2 border rounded">
+        <select
+          name="priority"
+          onChange={handleFilterChange}
+          value={filters.priority}
+          className="p-2 border rounded"
+        >
           <option value="all">All Priority</option>
           <option value="normal">Normal</option>
           <option value="high">High</option>
@@ -109,7 +124,11 @@ const AllIssues = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {issues.map((issue) => (
-            <IssueCard key={issue._id} issue={issue} onUpvote={() => handleUpvote(issue)} />
+            <IssueCard
+              key={issue._id}
+              issue={issue}
+              onUpvote={() => handleUpvote(issue)}
+            />
           ))}
         </div>
       )}

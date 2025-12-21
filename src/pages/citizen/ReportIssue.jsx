@@ -1,15 +1,22 @@
 import { useState, useEffect } from "react";
 import useAxiosSecure from "../../hooks/useAxiosSecure";
-import useAuth from "../../hooks/useAuth";
+// import useAuth from "../../hooks/useAuth";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthProvider";
 
 const ReportIssue = () => {
   const { user } = useAuth();
   const axiosSecure = useAxiosSecure();
   const navigate = useNavigate();
 
-  const [categories, setCategories] = useState(["Streetlight", "Pothole", "Garbage", "Water Leakage", "Footpath"]);
+  const [categories, setCategories] = useState([
+    "Streetlight",
+    "Pothole",
+    "Garbage",
+    "Water Leakage",
+    "Footpath",
+  ]);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -47,7 +54,9 @@ const ReportIssue = () => {
     e.preventDefault();
 
     if (!isPremium && issueCount >= 3) {
-      toast.error("Free users can submit maximum 3 issues. Please subscribe to premium.");
+      toast.error(
+        "Free users can submit maximum 3 issues. Please subscribe to premium."
+      );
       return;
     }
 
@@ -78,8 +87,13 @@ const ReportIssue = () => {
 
   return (
     <div className="max-w-xl mx-auto p-6">
-      <h1 className="text-3xl font-bold text-green-600 mb-6">Report New Issue</h1>
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow space-y-4">
+      <h1 className="text-3xl font-bold text-green-600 mb-6">
+        Report New Issue
+      </h1>
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-6 rounded shadow space-y-4"
+      >
         <div>
           <label className="font-semibold">Title</label>
           <input
@@ -112,7 +126,9 @@ const ReportIssue = () => {
           >
             <option value="">Select Category</option>
             {categories.map((c) => (
-              <option key={c} value={c}>{c}</option>
+              <option key={c} value={c}>
+                {c}
+              </option>
             ))}
           </select>
         </div>
@@ -129,7 +145,12 @@ const ReportIssue = () => {
         </div>
         <div>
           <label className="font-semibold">Image</label>
-          <input type="file" name="image" onChange={handleChange} className="border w-full p-2 rounded" />
+          <input
+            type="file"
+            name="image"
+            onChange={handleChange}
+            className="border w-full p-2 rounded"
+          />
         </div>
         <button
           type="submit"

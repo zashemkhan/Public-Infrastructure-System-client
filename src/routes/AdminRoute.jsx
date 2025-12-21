@@ -1,7 +1,8 @@
 import { Navigate, useLocation } from "react-router-dom";
-import useAuth from "../hooks/useAuth";
+// import useAuth from "../hooks/useAuth";
 import useAxiosSecure from "../hooks/useAxiosSecure";
 import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "../context/AuthProvider";
 
 const AdminRoute = ({ children }) => {
   const { user, loading } = useAuth();

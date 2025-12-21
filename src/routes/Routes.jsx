@@ -1,24 +1,20 @@
 import { createBrowserRouter } from "react-router-dom";
 import Home from "../pages/Home/Home";
 import ErrorPage from "../pages/ErrorPage";
-// import Login from "../pages/Login/Login";
-// import SignUp from "../pages/SignUp/SignUp";
 import PrivateRoute from "./PrivateRoute";
-// import DashboardLayout from "../layouts/DashboardLayout";
-// import MainLayout from "../layouts/MainLayout";
-// import CitizenDashboard from "../pages/Dashboard/CitizenDashboard";
-// import AdminDashboard from "../pages/Dashboard/AdminDashboard";
-// import StaffDashboard from "../pages/Dashboard/StaffDashboard";
 import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
 import MainLayout from "../layouts/MainLayout";
 import DashboardLayout from "../layouts/DashboardLayout";
 import IssueDetails from "../pages/IssueDetails";
-import CitizenDashboard from "../pages/Dashboard/CitizenDashboard";
-import AdminDashboard from "../pages/Dashboard/AdminDashboard";
-import StaffDashboard from "../pages/Dashboard/StaffDashboard";
-import CreateIssue from "../pages/Dashboard/CreateIssue";
 import MyIssues from "../pages/Dashboard/MyIssues";
+import AdminRoute from "./AdminRoute";
+import StaffRoute from "./StaffRoute";
+import AssignedIssues from "../pages/staff/AssignedIssues";
+import ManageUsers from "../pages/admin/ManageUsers";
+import AllIssues from "../pages/admin/AllIssues";
+import DashboardHome from "../pages/admin/DashboardHome";
+import AddIssue from "../pages/AllIssues/AddIssue";
 
 export const router = createBrowserRouter([
   {
@@ -26,12 +22,14 @@ export const router = createBrowserRouter([
     element: <MainLayout />,
     errorElement: <ErrorPage />,
     children: [
-      { path: "/", element: <Home /> },
-      { path: "/issue/:id", element: <IssueDetails /> },
+      { index: true, element: <Home /> },
+      { path: "issue/:id", element: <IssueDetails /> },
     ],
   },
+
   { path: "/login", element: <Login /> },
   { path: "/signup", element: <Register /> },
+
   {
     path: "/dashboard",
     element: (
@@ -40,11 +38,39 @@ export const router = createBrowserRouter([
       </PrivateRoute>
     ),
     children: [
-      { index: true, element: <CitizenDashboard /> },
-      { path: "create-issue", element: <CreateIssue /> },
+      { index: true, element: <DashboardHome /> },
+
+      // Citizen
       { path: "my-issues", element: <MyIssues /> },
-      { path: "admin", element: <AdminDashboard /> },
-      { path: "staff", element: <StaffDashboard /> },
+      { path: "add-issue", element: <AddIssue /> },
+
+      // Staff
+      {
+        path: "assigned",
+        element: (
+          <StaffRoute>
+            <AssignedIssues />
+          </StaffRoute>
+        ),
+      },
+
+      // Admin
+      {
+        path: "manage-users",
+        element: (
+          <AdminRoute>
+            <ManageUsers />
+          </AdminRoute>
+        ),
+      },
+      {
+        path: "/dashboard/all-issues",
+        element: (
+          <AdminRoute>
+            <AllIssues />
+          </AdminRoute>
+        ),
+      },
     ],
   },
 ]);

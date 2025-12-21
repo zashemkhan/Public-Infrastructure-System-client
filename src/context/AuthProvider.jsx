@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useState, useContext } from "react";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -43,12 +43,17 @@ const AuthProvider = ({ children }) => {
       setUser(currentUser);
 
       if (currentUser) {
-        const userInfo = { email: currentUser.email };
-        const res = await axios.post(
-          `${import.meta.env.VITE_SERVER_URL}/jwt`,
-          userInfo
-        );
-        localStorage.setItem("access-token", res.data.token);
+        try {
+          const userInfo = { email: currentUser.email };
+          const res = await axios.post(
+            `${import.meta.env.VITE_SERVER_URL}/jwt`,
+            userInfo
+          );
+          localStorage.setItem("access-token", res.data.token);
+        } catch (err) {
+          console.error("JWT fetch failed:", err);
+          localStorage.removeItem("access-token");
+        }
       } else {
         localStorage.removeItem("access-token");
       }
@@ -69,10 +74,10 @@ const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={authInfo}>
-      {children}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={authInfo}>{children}</AuthContext.Provider>
   );
 };
 
 export default AuthProvider;
+
+export const useAuth = () => useContext(AuthContext);

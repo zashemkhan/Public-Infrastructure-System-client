@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import useAxiosSecure from "../../hooks/useAxiosSecure";
-import useAuth from "../../hooks/useAuth";
+// import useAuth from "../../hooks/useAuth";
 import { toast } from "react-hot-toast";
+import { useAuth } from "../../context/AuthProvider";
 
 const Profile = () => {
   const { user } = useAuth();
@@ -39,7 +40,10 @@ const Profile = () => {
     <div className="p-6 max-w-xl mx-auto">
       <h1 className="text-3xl font-bold text-purple-600 mb-6">My Profile</h1>
 
-      <form className="bg-white p-6 rounded shadow space-y-4" onSubmit={handleUpdate}>
+      <form
+        className="bg-white p-6 rounded shadow space-y-4"
+        onSubmit={handleUpdate}
+      >
         <div>
           <label className="font-semibold">Name</label>
           <input
@@ -52,11 +56,16 @@ const Profile = () => {
           <label className="font-semibold">Photo URL</label>
           <input
             value={profile.photoURL || ""}
-            onChange={(e) => setProfile({ ...profile, photoURL: e.target.value })}
+            onChange={(e) =>
+              setProfile({ ...profile, photoURL: e.target.value })
+            }
             className="border w-full p-2 rounded"
           />
         </div>
-        <button type="submit" className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
+        <button
+          type="submit"
+          className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700"
+        >
           Update Profile
         </button>
       </form>

@@ -3,7 +3,7 @@ import Sidebar from "../components/SideBar";
 
 const DashboardLayout = () => {
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-green-50 to-white">
+    <div className="flex min-h-screen bg-gradient-to-br from-green-50 to-white text-black">
       <Sidebar />
       <div className="flex-1 p-4">
         <Outlet />

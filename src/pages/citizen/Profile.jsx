@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import useAxiosSecure from "../../hooks/useAxiosSecure";
-import useAuth from "../../hooks/useAuth";
+// import useAuth from "../../hooks/useAuth";
 import { toast } from "react-hot-toast";
+import { useAuth } from "../../context/AuthProvider";
 
 const Profile = () => {
   const { user } = useAuth();
@@ -42,13 +43,15 @@ const Profile = () => {
 
       <div className="bg-white p-6 rounded shadow space-y-4">
         <p>
-          <span className="font-semibold">Name:</span> {profile.name || user.displayName}
+          <span className="font-semibold">Name:</span>{" "}
+          {profile.name || user.displayName}
         </p>
         <p>
           <span className="font-semibold">Email:</span> {user.email}
         </p>
         <p>
-          <span className="font-semibold">Role:</span> {profile.role || "Citizen"}
+          <span className="font-semibold">Role:</span>{" "}
+          {profile.role || "Citizen"}
         </p>
         <p>
           <span className="font-semibold">Premium:</span>{" "}
