@@ -10,7 +10,6 @@ const CreateIssue = () => {
 
   // Get user info from localStorage
   const userEmail = localStorage.getItem("user-email");
-  const userRole = localStorage.getItem("user-role"); // e.g., citizen
   const isPremium = localStorage.getItem("user-isPremium") === "true";
 
   const handleSubmit = async (e) => {
@@ -18,7 +17,7 @@ const CreateIssue = () => {
     setLoading(true);
 
     try {
-      // Check user issue limit if not premium
+      // Free user limit check
       if (!isPremium) {
         const res = await axiosSecure.get(`/users/my-issues/count?email=${userEmail}`);
         if (res.data.count >= 3) {
@@ -30,26 +29,24 @@ const CreateIssue = () => {
 
       const form = e.target;
       const issueData = {
-        title: form.title.value,
+        title: form.title.value.trim(),
         category: form.category.value,
         priority: form.priority.value,
-        location: form.location.value,
-        description: form.description.value,
-        image: form.image.value || "",
-        reporter: userEmail,
+        location: form.location.value.trim(),
+        description: form.description.value.trim(),
+        image: form.image.value.trim() || "",
+        reporter: userEmail, // must include reporter
       };
 
-      // Submit issue
       await axiosSecure.post("/issues", issueData);
 
-      // Invalidate MyIssues query to refresh UI
-      queryClient.invalidateQueries(["my-issues"]);
+      queryClient.invalidateQueries(["my-issues"]); // Refresh user's issue list
 
       toast.success("Issue reported successfully!");
       form.reset();
     } catch (error) {
       console.error(error);
-      toast.error("Failed to submit issue");
+      toast.error(error.response?.data?.message || "Failed to submit issue");
     } finally {
       setLoading(false);
     }
@@ -62,7 +59,6 @@ const CreateIssue = () => {
       </h1>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-
         <input
           name="title"
           placeholder="Issue Title"
