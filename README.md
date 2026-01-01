@@ -1,4 +1,8 @@
 Live Demo: https://precious-pasca-b46a9b.netlify.app/
+
+Tech Stack:
+React, React Router, Tailwind CSS, Axios, TanStack Query, Firebase Authentication
+
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
